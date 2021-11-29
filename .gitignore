@@ -1,2 +1,4 @@
 **/node_modules
 **/build
+test_files/
+.DS_STORE

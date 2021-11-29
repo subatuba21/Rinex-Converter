@@ -1,7 +1,7 @@
 {
     "configurations": [
         {
-            "name": "Cloud Run: Run/Debug Locally",
+            "name": "RINEX-Converter",
             "type": "cloudcode.cloudrun",
             "request": "launch",
             "build": {
@@ -12,7 +12,7 @@
             "image": "gps-multi-project",
             "service": {
                 "name": "gps-multi-project",
-                "containerPort": 8080,
+                "containerPort": 80,
                 "resources": {
                     "limits": {
                         "memory": "256Mi"
@@ -22,7 +22,7 @@
             "target": {
                 "minikube": {}
             },
-            "watch": true
+            "watch": false
         }
     ]
 }
