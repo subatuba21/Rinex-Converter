@@ -15,12 +15,12 @@ func main() {
 	}
 	server.Routes()
 
-	f, _ := ioutil.ReadFile("test_files/igs21825.sp3")
-	file, _ := backend.ReadSatelliteFile(f)
+	f, _ := ioutil.ReadFile("test_files/rinex.txt")
+	file, _ := backend.ReadRINEX(f)
 	for _, epoch := range file.Epochs {
 		fmt.Printf("\n\nHour: %v, Minutes: %v \n\n\n", epoch.Hour, epoch.Minutes)
-		for _, sat := range epoch.SatelliteEntries {
-			fmt.Printf("Satellite ID: %v, X: %v, Y: %v, Z: %v\n", sat.GPSID, sat.PositionX, sat.PositionY, sat.PositionZ)
+		for _, rinex := range epoch.RinexEntries {
+			fmt.Printf("Satellite ID: %v, Pseudorange: %v", rinex.GPSID, rinex.Pseudorange)
 		}
 	}
 

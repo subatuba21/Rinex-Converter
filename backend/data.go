@@ -27,23 +27,27 @@ type SatelliteEpoch struct {
 }
 
 type RINEXFile struct {
-	Epochs *[]RINEXEpoch
+	Epochs []RINEXEpoch
 }
 
 type RINEXEntry struct {
-	GPSID          *string
-	Pseudorange    *float64
-	SignalStrength *float64
-	Doppler        *float64
+	GPSID          int
+	Pseudorange    float64
+	SignalStrength float64
+	Doppler        float64
 }
 
 type RINEXEpoch struct {
-	Time         *float64
-	RinexEntries *[]RINEXEntry
+	Year         int
+	Month        int
+	Day          int
+	Hour         int
+	Minutes      int
+	RinexEntries []RINEXEntry
 }
 
 type UnprocessedData struct {
-	GPSID         *string
+	GPSID         int
 	SatelliteInfo *[]SatelliteEpoch
 	RINEXInfo     *[]RINEXEpoch
 }
@@ -64,23 +68,135 @@ type ProcessedEData struct {
 func ReadRINEX(file []byte) (*RINEXFile, error) {
 	file_str := string(file)
 	lines := strings.Split(file_str, "\n")
+	rinex := RINEXFile{
+		Epochs: []RINEXEpoch{},
+	}
 
-	in_header := true
-	// rinex_version := ""
+	in_epoch := false
+	currentEpoch := RINEXEpoch{}
 
 	for _, line := range lines {
 
-		if strings.Contains(line, "END OF HEADER") {
-			fmt.Println("END OF HEADER")
-			return nil, nil
+		if len(line) > 0 && line[0] == '>' {
+			if in_epoch {
+				rinex.Epochs = append(rinex.Epochs, currentEpoch)
+			} else {
+				in_epoch = true
+			}
+
+			e, err := ReadRinexEpochHeaderLine(line)
+
+			if err != nil {
+				fmt.Printf("Error: %v", err)
+				return nil, err
+			}
+
+			currentEpoch = *e
+
+		} else if len(line) > 0 && line[0:1] == "G" {
+			entry, err := ReadRinexInfoLine(line)
+			if err != nil {
+				fmt.Printf("Error: %v", err)
+				return nil, err
+			}
+
+			currentEpoch.RinexEntries = append(currentEpoch.RinexEntries, *entry)
 		}
 
-		if !in_header {
-			return nil, nil
+	}
+
+	return &rinex, nil
+}
+
+func ReadRinexEpochHeaderLine(line string) (*RINEXEpoch, error) {
+	if line[0] != '>' {
+		return nil, fmt.Errorf("error, epoch header doesn't start with *")
+	}
+
+	epoch := RINEXEpoch{}
+	in_word := false
+	word_index := 0
+	current_word := ""
+
+	for _, char := range line {
+		if char == '>' {
+			continue
+		} else if char == ' ' {
+
+			if in_word {
+				switch word_index {
+				case 0:
+					year, _ := strconv.Atoi(current_word)
+					epoch.Year = year
+
+				case 1:
+					month, _ := strconv.Atoi(current_word)
+					epoch.Month = month
+
+				case 2:
+					day, _ := strconv.Atoi(current_word)
+					epoch.Day = day
+
+				case 3:
+					hour, _ := strconv.Atoi(current_word)
+					epoch.Hour = hour
+
+				case 4:
+					minutes, _ := strconv.Atoi(current_word)
+					epoch.Minutes = minutes
+
+				default:
+
+				}
+
+				word_index++
+				in_word = false
+				current_word = ""
+			}
+
+		} else {
+
+			if !in_word {
+				in_word = true
+			}
+
+			current_word += string(char)
+		}
+
+	}
+
+	return &epoch, nil
+
+}
+
+func ReadRinexInfoLine(line string) (*RINEXEntry, error) {
+	entry := RINEXEntry{}
+	if line[0:1] != "G" {
+		// Different type of satelite
+		return nil, nil
+	}
+
+	in_word := false
+	current_word := ""
+	words := []string{}
+	for _, char := range line {
+		if char == ' ' {
+			if in_word {
+				words = append(words, current_word)
+				in_word = false
+				current_word = ""
+			}
+		} else {
+			in_word = true
+			current_word += string(char)
 		}
 	}
 
-	return nil, nil
+	gpsid, _ := strconv.Atoi(words[0][1:])
+	entry.GPSID = gpsid
+	entry.Pseudorange, _ = strconv.ParseFloat(words[1], 64)
+	return &entry, nil
+
 }
 
 func ReadSatelliteFile(file []byte) (*SatelliteFile, error) {
@@ -95,7 +211,11 @@ func ReadSatelliteFile(file []byte) (*SatelliteFile, error) {
 	currentEpoch := SatelliteEpoch{}
 	for _, line := range lines {
 
-		if len(line) > 0 && line[0] == '*' {
+		if len(line) > 0 && line[0:3] == "EOF" {
+			if in_epoch {
+				satfile.Epochs = append(satfile.Epochs, currentEpoch)
+			}
+		} else if len(line) > 0 && line[0] == '*' {
 			if in_epoch {
 				satfile.Epochs = append(satfile.Epochs, currentEpoch)
 			} else {
