@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -15,14 +14,16 @@ func main() {
 	}
 	server.Routes()
 
-	f, _ := ioutil.ReadFile("test_files/rinex.txt")
-	file, _ := backend.ReadRINEX(f)
-	for _, epoch := range file.Epochs {
-		fmt.Printf("\n\nHour: %v, Minutes: %v \n\n\n", epoch.Hour, epoch.Minutes)
-		for _, rinex := range epoch.RinexEntries {
-			fmt.Printf("Satellite ID: %v, Pseudorange: %v", rinex.GPSID, rinex.Pseudorange)
-		}
-	}
+	f, _ := ioutil.ReadFile("test_files/rinex2.txt")
+	// file, _ := backend.ReadRINEX(f)
+	// for _, epoch := range file.Epochs {
+	// 	fmt.Printf("\n\nHour: %v, Minutes: %v \n\n\n", epoch.Hour, epoch.Minutes)
+	// 	for _, rinex := range epoch.RinexEntries {
+	// 		fmt.Printf("Satellite ID: %v, Pseudorange: %v", rinex.GPSID, rinex.Pseudorange)
+	// 	}
+	// }
+
+	backend.ProcessRINEXPart1(f)
 
 	log.Fatal(http.ListenAndServe(":80", server.Router))
 }

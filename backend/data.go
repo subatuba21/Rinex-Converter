@@ -1,9 +1,16 @@
 package backend
 
 import (
+	"bytes"
+	"crypto/tls"
 	"fmt"
+	"io/ioutil"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/hotei/dcompress"
+	"github.com/jlaffaye/ftp"
 )
 
 type SatelliteFile struct {
@@ -26,6 +33,17 @@ type SatelliteEpoch struct {
 	Minutes          int
 }
 
+type Date struct {
+	Year  int
+	Month int
+	Day   int
+}
+
+type GPSWeekAndDay struct {
+	week int
+	day  int
+}
+
 type RINEXFile struct {
 	Epochs []RINEXEpoch
 }
@@ -43,6 +61,7 @@ type RINEXEpoch struct {
 	Day          int
 	Hour         int
 	Minutes      int
+	Seconds      int
 	RinexEntries []RINEXEntry
 }
 
@@ -52,17 +71,19 @@ type UnprocessedData struct {
 	RINEXInfo     *[]RINEXEpoch
 }
 
-type ProcessedEData struct {
+type ProcessedData struct {
 	GPSID         *string
 	SatelliteInfo *[]SatelliteEntry
 	RINEXInfo     *[]RINEXEntry
-	UserLocation  *struct {
-		PositionX *float64
-		PositionY *float64
-		PositionZ *float64
-		Latitude  *float64
-		Longitude *float64
-	}
+}
+
+type UserLocation *struct {
+	PositionX float64
+	PositionY float64
+	PositionZ float64
+	Latitude  float64
+	Longitude float64
+	Date      Date
 }
 
 func ReadRINEX(file []byte) (*RINEXFile, error) {
@@ -144,6 +165,10 @@ func ReadRinexEpochHeaderLine(line string) (*RINEXEpoch, error) {
 				case 4:
 					minutes, _ := strconv.Atoi(current_word)
 					epoch.Minutes = minutes
+
+				case 5:
+					seconds, _ := strconv.Atoi(current_word)
+					epoch.Seconds = seconds
 
 				default:
 
@@ -333,4 +358,93 @@ func ReadSatelliteInfoLine(line string) (*SatelliteEntry, error) {
 	entry.PositionY, _ = strconv.ParseFloat(words[2], 64)
 	entry.PositionZ, _ = strconv.ParseFloat(words[3], 64)
 	return &entry, nil
+}
+
+func ProcessRINEXPart1(rinexfilebytes []byte) (*UnprocessedData, error) {
+	rinex_file, err := ReadRINEX(rinexfilebytes)
+	if err != nil {
+		fmt.Printf("Error: %v", err)
+		return nil, err
+	}
+
+	dates := map[Date]bool{}
+
+	for _, epoch := range rinex_file.Epochs {
+		date := Date{
+			Year:  epoch.Year,
+			Month: epoch.Month,
+			Day:   epoch.Day,
+		}
+
+		if _, ok := dates[date]; !ok {
+			dates[date] = true
+		}
+	}
+
+	// Getting satelite data from CDDIS
+	tlsconfig := tls.Config{
+		InsecureSkipVerify: true,
+		ClientAuth:         tls.RequestClientCert,
+	}
+	tlsoption := ftp.DialWithExplicitTLS(&tlsconfig)
+
+	c, err := ftp.Dial("gdc.cddis.eosdis.nasa.gov:21", tlsoption, ftp.DialWithTimeout(10*time.Second))
+	if err != nil {
+		fmt.Printf("Error: %v", err)
+		return nil, err
+	}
+
+	err = c.Login("anonymous", "anonymous")
+	if err != nil {
+		fmt.Printf("Error: %v", err)
+		return nil, err
+	}
+
+	if err != nil {
+		fmt.Printf("Error: %v", err)
+		return nil, err
+	}
+
+	gpsdirectories := map[GPSWeekAndDay]bool{}
+	for k := range dates {
+		fmt.Println(k.Year, time.Month(k.Month), k.Day)
+		weekandday := CalculateGPSWeekAndDay(k.Year, time.Month(k.Month), k.Day)
+		gpsdirectories[weekandday] = true
+	}
+
+	fmt.Println(gpsdirectories)
+
+	for k := range gpsdirectories {
+		gpsresult, err := c.Retr(fmt.Sprintf("/pub/gps/products/%v/%v", k.week, fmt.Sprintf("igs%v%v.sp3.Z", k.week, k.day)))
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		fmt.Println(fmt.Sprintf("/pub/gps/products/%v/%v", k.week, fmt.Sprintf("igs%v%v.sp3.Z", k.week, k.day)))
+
+		gpsbytes, _ := ioutil.ReadAll(gpsresult)
+		gpsresult.Close()
+
+		r, _ := dcompress.NewReader(bytes.NewReader(gpsbytes))
+		filebytes, _ := ioutil.ReadAll(r)
+		satfile := string(filebytes)
+		// satfile, _ := readZipFile(zipreader.File[0])
+
+		// fmt.Println(string(satfile))
+		fmt.Println(string(satfile), err)
+	}
+
+	return nil, nil
+}
+
+func CalculateGPSWeekAndDay(year int, month time.Month, day int) GPSWeekAndDay {
+	baseDate := time.Date(2006, 1, 1, 0, 0, 0, 0, time.UTC)
+	baseGPSWeek := 1356
+	currentDate := time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
+	duration := currentDate.Sub(baseDate)
+	weeksDifference := int(duration.Hours() / 168)
+	daysDifference := int(duration.Hours() / 24)
+	GPSWeek := weeksDifference + baseGPSWeek
+	GPSDay := daysDifference % 7
+	return GPSWeekAndDay{week: GPSWeek, day: GPSDay}
 }
