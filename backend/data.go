@@ -22,6 +22,7 @@ type SatelliteEntry struct {
 	PositionX float64
 	PositionY float64
 	PositionZ float64
+	ClockBias float64
 }
 
 type SatelliteEpoch struct {
@@ -66,9 +67,8 @@ type RINEXEpoch struct {
 }
 
 type UnprocessedData struct {
-	GPSID         int
-	SatelliteInfo *[]SatelliteEpoch
-	RINEXInfo     *[]RINEXEpoch
+	SatelliteInfo SatelliteEpoch
+	RINEXInfo     RINEXEpoch
 }
 
 type ProcessedData struct {
@@ -357,6 +357,7 @@ func ReadSatelliteInfoLine(line string) (*SatelliteEntry, error) {
 	entry.PositionX, _ = strconv.ParseFloat(words[1], 64)
 	entry.PositionY, _ = strconv.ParseFloat(words[2], 64)
 	entry.PositionZ, _ = strconv.ParseFloat(words[3], 64)
+	entry.ClockBias, _ = strconv.ParseFloat(words[4], 64)
 	return &entry, nil
 }
 
@@ -427,11 +428,8 @@ func ProcessRINEXPart1(rinexfilebytes []byte) (*UnprocessedData, error) {
 
 		r, _ := dcompress.NewReader(bytes.NewReader(gpsbytes))
 		filebytes, _ := ioutil.ReadAll(r)
-		satfile := string(filebytes)
-		// satfile, _ := readZipFile(zipreader.File[0])
+		sat, _ := ReadSatelliteFile(filebytes)
 
-		// fmt.Println(string(satfile))
-		fmt.Println(string(satfile), err)
 	}
 
 	return nil, nil
@@ -447,4 +445,24 @@ func CalculateGPSWeekAndDay(year int, month time.Month, day int) GPSWeekAndDay {
 	GPSWeek := weeksDifference + baseGPSWeek
 	GPSDay := daysDifference % 7
 	return GPSWeekAndDay{week: GPSWeek, day: GPSDay}
+}
+
+func ProcessRINEXPart2(satfiles []SatelliteFile, rinexfile RINEXFile) {
+	for _, epoch := range rinexfile.Epochs {
+		for _, file := range satfiles {
+			for _, satepoch := range file.Epochs {
+				if epoch.Year == satepoch.Year && epoch.Month == satepoch.Month && epoch.Day == satepoch.Day && epoch.Hour == satepoch.Hour && epoch.Minutes-15 < satepoch.Minutes {
+					unprocessedData := UnprocessedData{
+						SatelliteInfo: satepoch,
+						RINEXInfo:     epoch,
+					}
+
+				}
+			}
+		}
+	}
+}
+
+func algorithm(data UnprocessedData) {
+	data.SatelliteInfo.SatelliteEntries
 }

@@ -1,0 +1,77 @@
+#home-page {
+    text-align: center;
+    display: flex;
+}
+
+#home-page #example-section {
+    width: 55%;
+    margin: 2%;
+}
+
+#home-page #upload-section {
+    width: 40%;
+    margin: 2%;
+    color: white;
+    text-align: left;
+    font-size: 1.4rem;
+}
+
+#home-page #rinex-file {
+    background-color: white;
+    border: 0px;
+    font-size: 1px;
+    display: block;
+    height: 60vh;
+}
+
+#home-page #upload-button {
+    display: block;
+    margin-top: 10px;
+    text-align: center;
+    margin-top: 15px;
+    width: 70%;
+    background-color: var(--background-two);
+    color: var(--accent-color);
+    
+}
+
+#home-page .example-file {
+    width: 80%;
+    display: flex;
+    justify-content: space-between;
+    background-color: white;
+    border-radius: 5px;
+    margin-top: 15px;
+    color: black;
+}
+
+#home-page .example-file p {
+    margin: 0px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+
+.example-file .download-icon {
+    border-left: 2px solid var(--accent-color);
+    width: 10%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.example-file .download-icon a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: black;
+}
+
+#processing {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh;
+    font-size: 2rem;
+    color: white;
+}

@@ -1,0 +1,21 @@
+.navbottom#navbar {
+    position: fixed;
+    bottom: 0;
+    height: 5rem;
+    background-color: var(--accent-color);
+    width: 100%;
+}
+
+.navbottom #icon-case {
+    display: flex;
+    width: 100%;
+    margin: 0 auto;
+    justify-content: space-evenly;
+    align-items: center;
+    height: 100%;
+}
+
+.navbottom #icon-case i {
+    font-size: 2.5rem;
+    color: black;
+}

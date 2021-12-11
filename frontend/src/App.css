@@ -1,5 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap');
+
+:root {
+  --accent-color: #ef6c08;
+  --background-one: #0f1318;
+  --background-two: #404352;
+}
+
+.accent-color-text {
+  color: var(--accent-color);
+}
+
 .App {
   text-align: center;
+  background-image: linear-gradient(to bottom right, var(--background-one), var(--background-two));
+  min-height: 100vh;
+  font-family: 'DM Serif Display', serif;
 }
 
 .App-logo {
@@ -36,3 +51,18 @@
     transform: rotate(360deg);
   }
 }
+
+#mobile-only {
+  display: none;
+}
+
+@media screen and (max-width: 1000px) {
+  #computer-only {
+    display: none;
+  }
+
+  #mobile-only {
+    display: block;
+  }
+}
+
