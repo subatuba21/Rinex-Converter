@@ -14,7 +14,7 @@ func main() {
 	}
 	server.Routes()
 
-	f, _ := ioutil.ReadFile("test_files/rinex2.txt")
+	f, _ := ioutil.ReadFile("test_files/rinex.txt")
 	// file, _ := backend.ReadRINEX(f)
 	// for _, epoch := range file.Epochs {
 	// 	fmt.Printf("\n\nHour: %v, Minutes: %v \n\n\n", epoch.Hour, epoch.Minutes)
