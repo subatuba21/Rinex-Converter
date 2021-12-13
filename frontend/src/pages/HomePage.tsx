@@ -3,6 +3,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import { Dot } from "react-animated-dots";
 import "./HomePage.css";
 import { ChangeEvent, useState } from "react";
+import MapComponent from "../mapsapi";
 
 const upload_page = "u";
 const processing_page = "p";
@@ -25,6 +26,8 @@ type EpochData = {
   };
 };
 type Response = Array<EpochData>;
+
+console.log(process.env.REACT_APP_MAPS_API_CODE)
 
 export function HomePage(props: HomePageProps) {
   const [page, setPage] = props.homeState;
@@ -127,8 +130,13 @@ export function HomePage(props: HomePageProps) {
     return (
       <div id="results">
         <div id="left">
-          <div id="map"></div>
-          <div id="stats"></div>
+          <div id="map">
+            <MapComponent latitude={results ? results[0].UserLocation.Latitude : 0}
+            longitude={results ? results[0].UserLocation.Longitude : 0}></MapComponent>
+          </div>
+          <div id="stats">
+            <h2>Satellites Available</h2>
+          </div>
         </div>
         <div id="right">
           <p>

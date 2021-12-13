@@ -81,13 +81,13 @@
 }
 
 #results #left {
-    display: inline-block;
+    float: left;
     width: 50%;
     
 }
 
 #results #right {
-    display: inline-block;
+    float: left;
     width: 40%;
     text-align: left;
 }
@@ -98,6 +98,11 @@
 }
 
 #results #right h2 {
+    color: var(--accent-color);
+    font-size: 1.7rem;
+}
+
+#stats h2 {
     color: var(--accent-color);
     font-size: 1.7rem;
 }
