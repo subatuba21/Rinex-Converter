@@ -32,11 +32,3 @@ function App() {
 }
 
 export default App;
-function props(
-  props: any
-):
-  | React.ReactElement<any, string | React.JSXElementConstructor<any>>
-  | null
-  | undefined {
-  throw new Error("Function not implemented.");
-}

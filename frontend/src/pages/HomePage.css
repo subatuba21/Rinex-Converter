@@ -75,3 +75,29 @@
     font-size: 2rem;
     color: white;
 }
+
+#results {
+    padding: 10px;
+}
+
+#results #left {
+    display: inline-block;
+    width: 50%;
+    
+}
+
+#results #right {
+    display: inline-block;
+    width: 40%;
+    text-align: left;
+}
+
+#results #right p {
+    color:white;
+    font-size: 1.3rem;
+}
+
+#results #right h2 {
+    color: var(--accent-color);
+    font-size: 1.7rem;
+}

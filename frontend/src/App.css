@@ -15,6 +15,7 @@
   background-image: linear-gradient(to bottom right, var(--background-one), var(--background-two));
   min-height: 100vh;
   font-family: 'DM Serif Display', serif;
+  padding-bottom: 5rem;
 }
 
 .App-logo {

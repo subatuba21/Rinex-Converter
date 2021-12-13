@@ -15,11 +15,38 @@ type HomePageProps = {
   ];
 };
 
+type EpochData = {
+  UserLocation: {
+    PositionX: number;
+    PositionY: number;
+    PositionZ: number;
+    Latitude: number;
+    Longitude: number;
+  };
+};
+type Response = Array<EpochData>;
+
 export function HomePage(props: HomePageProps) {
   const [page, setPage] = props.homeState;
+  const [results, setResults] = useState<Response | null>(null);
+
   function onUpload(event: ChangeEvent<HTMLInputElement>) {
-    setPage(processing_page);
-    console.log(event.target.value);
+    const formData = new FormData();
+    if (event.target.files && event.target.files.length > 0) {
+      formData.append("rinex", event.target.files[0]);
+      console.log(event.target.files);
+      setPage(processing_page);
+
+      fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          setResults(res);
+          setPage(results_page);
+        });
+    }
   }
 
   if (page === upload_page) {
@@ -97,7 +124,37 @@ export function HomePage(props: HomePageProps) {
       </div>
     );
   } else if (page === results_page) {
-    return <></>;
+    return (
+      <div id="results">
+        <div id="left">
+          <div id="map"></div>
+          <div id="stats"></div>
+        </div>
+        <div id="right">
+          <p>
+            <h2>ECEF Coordinates</h2>
+            X: {results ? results[0].UserLocation.PositionX : ""} meters
+            <br />
+            Y: {results ? results[0].UserLocation.PositionY : ""} meters
+            <br />
+            Z: {results ? results[0].UserLocation.PositionX : ""} meters
+            <br />
+            <br />
+            <h2>Latitude and Longitude</h2>
+            Latitude: {results ? results[0].UserLocation.Latitude : ""}
+            <br />
+            Longitude: {results ? results[0].UserLocation.Longitude : ""}
+            <br />
+            <br />
+            <span style={{ fontSize: "1.3rem" }}>
+              {" "}
+              Want to know how the application calculated these values? Click
+              the info button on the bottom right to learn more.
+            </span>
+          </p>
+        </div>
+      </div>
+    );
   } else {
     setPage(upload_page);
     return <></>;

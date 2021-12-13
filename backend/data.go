@@ -72,18 +72,17 @@ type UnprocessedData struct {
 }
 
 type ProcessedData struct {
-	GPSID         *string
-	SatelliteInfo *[]SatelliteEntry
-	RINEXInfo     *[]RINEXEntry
+	UserLocation  UserLocation
+	SatelliteInfo SatelliteEpoch
+	RINEXInfo     RINEXEpoch
 }
 
-type UserLocation *struct {
+type UserLocation struct {
 	PositionX float64
 	PositionY float64
 	PositionZ float64
 	Latitude  float64
 	Longitude float64
-	Date      Date
 }
 
 func ReadRINEX(file []byte) (*RINEXFile, error) {
@@ -366,7 +365,8 @@ func ReadSatelliteInfoLine(line string) (*SatelliteEntry, error) {
 	return &entry, nil
 }
 
-func ProcessRINEXPart1(rinexfilebytes []byte) (*UnprocessedData, error) {
+func ProcessRINEX(rinexfilebytes []byte) (*[]ProcessedData, error) {
+
 	rinex_file, err := ReadRINEX(rinexfilebytes)
 	if err != nil {
 		fmt.Printf("Error: %v", err)
@@ -439,9 +439,25 @@ func ProcessRINEXPart1(rinexfilebytes []byte) (*UnprocessedData, error) {
 		satfiles = append(satfiles, *sat)
 	}
 
-	ProcessRINEXPart2(satfiles, *rinex_file)
+	data := []ProcessedData{}
+	for _, epoch := range rinex_file.Epochs {
+		for _, file := range satfiles {
+			for _, satepoch := range file.Epochs {
+				if epoch.Year == satepoch.Year && epoch.Month == satepoch.Month && epoch.Day == satepoch.Day && epoch.Hour == satepoch.Hour && (epoch.Minutes >= satepoch.Minutes && epoch.Minutes-15 <= satepoch.Minutes) {
 
-	return nil, nil
+					unprocessedData := UnprocessedData{
+						SatelliteInfo: satepoch,
+						RINEXInfo:     epoch,
+					}
+
+					data = append(data, Algorithm(unprocessedData))
+
+				}
+			}
+		}
+	}
+
+	return &data, nil
 }
 
 func CalculateGPSWeekAndDay(year int, month time.Month, day int) GPSWeekAndDay {
@@ -454,27 +470,4 @@ func CalculateGPSWeekAndDay(year int, month time.Month, day int) GPSWeekAndDay {
 	GPSWeek := weeksDifference + baseGPSWeek
 	GPSDay := daysDifference % 7
 	return GPSWeekAndDay{week: GPSWeek, day: GPSDay}
-}
-
-func ProcessRINEXPart2(satfiles []SatelliteFile, rinexfile RINEXFile) {
-	count := 1
-	for _, epoch := range rinexfile.Epochs {
-		for _, file := range satfiles {
-			for _, satepoch := range file.Epochs {
-				if epoch.Year == satepoch.Year && epoch.Month == satepoch.Month && epoch.Day == satepoch.Day && epoch.Hour == satepoch.Hour && (epoch.Minutes >= satepoch.Minutes && epoch.Minutes-15 <= satepoch.Minutes) {
-
-					fmt.Println(count, satepoch.Year, satepoch.Day, satepoch.Month, satepoch.Hour, satepoch.Minutes, epoch.Minutes)
-					count++
-
-					unprocessedData := UnprocessedData{
-						SatelliteInfo: satepoch,
-						RINEXInfo:     epoch,
-					}
-
-					Algorithm(unprocessedData)
-
-				}
-			}
-		}
-	}
 }

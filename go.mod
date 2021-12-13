@@ -3,6 +3,7 @@ module github.com/subatuba21/rinex-converter
 go 1.16
 
 require (
+	github.com/StefanSchroeder/Golang-Ellipsoid v0.0.0-20200928074047-3758eb9e9574 // indirect
 	github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b // indirect
 	github.com/erwiese/rinex v0.0.0-20200807221944-6dad5c340ebe // indirect
 	github.com/hotei/dcompress v0.0.0-20150530022901-3c67b82327a0 // indirect

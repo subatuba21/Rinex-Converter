@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/StefanSchroeder/Golang-Ellipsoid/ellipsoid"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -22,9 +23,22 @@ func Algorithm(data UnprocessedData) ProcessedData {
 		t += tcorrection
 	}
 
-	fmt.Println("Final results", x, y, z, t)
+	// fmt.Println("Final results", x, y, z, t)
+	geo1 := ellipsoid.Init("WGS84", ellipsoid.Degrees, ellipsoid.Meter, ellipsoid.LongitudeIsSymmetric, ellipsoid.BearingIsSymmetric)
+	lat, long, _ := geo1.ToLLA(x, y, z)
 
-	return ProcessedData{}
+	userLocation := UserLocation{
+		PositionX: x,
+		PositionY: y,
+		PositionZ: z,
+		Latitude:  lat,
+		Longitude: long,
+	}
+	return ProcessedData{
+		UserLocation:  userLocation,
+		SatelliteInfo: data.SatelliteInfo,
+		RINEXInfo:     data.RINEXInfo,
+	}
 }
 
 func solve(x float64, y float64, z float64, t float64, data UnprocessedData) (xcorrection float64, ycorrection float64, zcorrection float64, tcorrection float64) {
