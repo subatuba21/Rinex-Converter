@@ -1,19 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import "./App.css";
 import NavBottom from "./components/navbar-bottom/NavBottom";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import TopBar from "./components/navbar-bottom/TopBar";
-import HomePage from "./pages/HomePage";
+import {HomePage, PageStatus} from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 
 function App() {
+
+  const pageState = useState(PageStatus.upload_page);
+  
   return (
     <div className="App">
       <TopBar></TopBar>
       <div id="computer-only">
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<HomePage></HomePage>}></Route>
+            <Route path="/" element={<HomePage homeState={pageState}></HomePage>}></Route>
           </Routes>
           <Routes>
             <Route path="/about" element={<AboutPage></AboutPage>}></Route>

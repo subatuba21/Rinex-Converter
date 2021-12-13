@@ -124,6 +124,11 @@ func ReadRINEX(file []byte) (*RINEXFile, error) {
 			currentEpoch.RinexEntries = append(currentEpoch.RinexEntries, *entry)
 		}
 
+		// Only want to read first 10 epochs to avoid overloading the app
+		if len(rinex.Epochs) >= 10 {
+			break
+		}
+
 	}
 
 	return &rinex, nil
@@ -415,6 +420,8 @@ func ProcessRINEXPart1(rinexfilebytes []byte) (*UnprocessedData, error) {
 
 	fmt.Println(gpsdirectories)
 
+	satfiles := []SatelliteFile{}
+
 	for k := range gpsdirectories {
 		gpsresult, err := c.Retr(fmt.Sprintf("/pub/gps/products/%v/%v", k.week, fmt.Sprintf("igs%v%v.sp3.Z", k.week, k.day)))
 		if err != nil {
@@ -429,8 +436,10 @@ func ProcessRINEXPart1(rinexfilebytes []byte) (*UnprocessedData, error) {
 		r, _ := dcompress.NewReader(bytes.NewReader(gpsbytes))
 		filebytes, _ := ioutil.ReadAll(r)
 		sat, _ := ReadSatelliteFile(filebytes)
-
+		satfiles = append(satfiles, *sat)
 	}
+
+	ProcessRINEXPart2(satfiles, *rinex_file)
 
 	return nil, nil
 }
@@ -448,21 +457,24 @@ func CalculateGPSWeekAndDay(year int, month time.Month, day int) GPSWeekAndDay {
 }
 
 func ProcessRINEXPart2(satfiles []SatelliteFile, rinexfile RINEXFile) {
+	count := 1
 	for _, epoch := range rinexfile.Epochs {
 		for _, file := range satfiles {
 			for _, satepoch := range file.Epochs {
-				if epoch.Year == satepoch.Year && epoch.Month == satepoch.Month && epoch.Day == satepoch.Day && epoch.Hour == satepoch.Hour && epoch.Minutes-15 < satepoch.Minutes {
+				if epoch.Year == satepoch.Year && epoch.Month == satepoch.Month && epoch.Day == satepoch.Day && epoch.Hour == satepoch.Hour && (epoch.Minutes >= satepoch.Minutes && epoch.Minutes-15 <= satepoch.Minutes) {
+
+					fmt.Println(count, satepoch.Year, satepoch.Day, satepoch.Month, satepoch.Hour, satepoch.Minutes, epoch.Minutes)
+					count++
+
 					unprocessedData := UnprocessedData{
 						SatelliteInfo: satepoch,
 						RINEXInfo:     epoch,
 					}
 
+					Algorithm(unprocessedData)
+
 				}
 			}
 		}
 	}
-}
-
-func algorithm(data UnprocessedData) {
-	data.SatelliteInfo.SatelliteEntries
 }

@@ -1,0 +1,15 @@
+#markdown-doc {
+    color: white;
+    margin: 0 auto;
+    max-width: 800px;
+    text-align: left;
+}
+
+#markdown-doc h1, #markdown-doc h2, #markdown-doc h3, #markdown-doc h4, #markdown-doc h5, #markdown-doc h6 {
+    color: var(--accent-color);
+}
+
+#markdown-doc p {
+    font-size: 1.3rem;
+}
+

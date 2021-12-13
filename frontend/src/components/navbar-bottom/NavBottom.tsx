@@ -18,17 +18,24 @@ export default function NavBottom(props: any) {
   return (
     <div className="navbottom" id="navbar">
       <div id="icon-case">
-        <a href="https://google.com">
+
+      <Link to="/">
+          <HtmlTooltip title="Home Page">
+            <i className="mdi mdi-home"></i>
+          </HtmlTooltip>
+        </Link>
+
+        <a href="https://docs.google.com/presentation/d/1OhiSuxfpeR75B5-2a5aedXSRsKi1ecaLB2Yk64ziM5U/edit?usp=sharing" target="_blank" rel="noreferrer">
           <HtmlTooltip title="View Presentation">
             <i className="mdi mdi-file-presentation-box"></i>
           </HtmlTooltip>
         </a>
 
-        <Link to="/">
-          <HtmlTooltip title="Home Page">
-            <i className="mdi mdi-home"></i>
+        <a href="https://github.com/subatuba21/Rinex-Converter" target="_blank" rel="noreferrer">
+          <HtmlTooltip title="View Code">
+            <i className="mdi mdi-github"></i>
           </HtmlTooltip>
-        </Link>
+        </a>
 
         <Link to="/about">
           <HtmlTooltip title="About This App">

@@ -1,6 +1,6 @@
 import { Button } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
-import { Dot } from 'react-animated-dots';
+import { Dot } from "react-animated-dots";
 import "./HomePage.css";
 import { ChangeEvent, useState } from "react";
 
@@ -8,8 +8,15 @@ const upload_page = "u";
 const processing_page = "p";
 const results_page = "r";
 
-export default function HomePage(props: any) {
-  const [page, setPage] = useState(upload_page);
+type HomePageProps = {
+  homeState: [
+    page: string,
+    setPage: React.Dispatch<React.SetStateAction<string>>
+  ];
+};
+
+export function HomePage(props: HomePageProps) {
+  const [page, setPage] = props.homeState;
   function onUpload(event: ChangeEvent<HTMLInputElement>) {
     setPage(processing_page);
     console.log(event.target.value);
@@ -82,18 +89,24 @@ export default function HomePage(props: any) {
     return (
       <div id="processing">
         <h2>
-         Processing
-         <Dot>.</Dot>
-         <Dot>.</Dot>
-         <Dot>.</Dot>
+          Processing
+          <Dot>.</Dot>
+          <Dot>.</Dot>
+          <Dot>.</Dot>
         </h2>
       </div>
     );
   } else if (page === results_page) {
-    return <></>
+    return <></>;
   } else {
-    setPage(upload_page)
-    return <></>
+    setPage(upload_page);
+    return <></>;
   }
   return <></>;
 }
+
+export const PageStatus = {
+  upload_page: "u",
+  processing_page: "p",
+  results_page: "r",
+};
