@@ -9,10 +9,25 @@ import (
 
 var c float64 = 299792458
 
-const iterations = 1
+const iterations = 10
 
 func Algorithm(data UnprocessedData) ProcessedData {
 	x, y, z, t := 4331297.3480, 567555.6390, 4633133.7280, 0.
+
+	for i := 0; i < iterations; i++ {
+		xcorrection, ycorrection, zcorrection, tcorrection := solve(x, y, z, t, data)
+		x += xcorrection
+		y += ycorrection
+		z += zcorrection
+		t += tcorrection
+	}
+
+	fmt.Println("Final results", x, y, z, t)
+
+	return ProcessedData{}
+}
+
+func solve(x float64, y float64, z float64, t float64, data UnprocessedData) (xcorrection float64, ycorrection float64, zcorrection float64, tcorrection float64) {
 	satellitePseudoranges := []float64{}
 	availableSatData := []float64{}
 
@@ -29,24 +44,10 @@ func Algorithm(data UnprocessedData) ProcessedData {
 	pseudorangevector := mat.NewVecDense(len(data.RINEXInfo.RinexEntries), satellitePseudoranges)
 	satellitematrix := mat.NewDense(len(satellitePseudoranges), 4, availableSatData)
 
-	for i := 0; i < iterations; i++ {
-		xcorrection, ycorrection, zcorrection, tcorrection := solve(x, y, z, t, pseudorangevector, satellitematrix)
-		x += xcorrection
-		y += ycorrection
-		z += zcorrection
-		t += tcorrection
-	}
-
-	fmt.Println("Final results", x, y, z, t)
-
-	return ProcessedData{}
-}
-
-func solve(x float64, y float64, z float64, t float64, pseudorangevector *mat.VecDense, satellitematrix *mat.Dense) (xcorrection float64, ycorrection float64, zcorrection float64, tcorrection float64) {
 	numSatellites := pseudorangevector.Len()
 	// Convert clock bias to seconds (its in microseconds)
 	newClockBiasVector := mat.VecDenseCopyOf(satellitematrix.ColView(3))
-	newClockBiasVector.ScaleVec(1.0/100000.0, newClockBiasVector)
+	newClockBiasVector.ScaleVec(1.0/1000000.0, newClockBiasVector)
 	satellitematrix.SetCol(3, newClockBiasVector.RawVector().Data)
 
 	// Convert satellite position X to meters (currently in kilometers)
@@ -115,7 +116,6 @@ func solve(x float64, y float64, z float64, t float64, pseudorangevector *mat.Ve
 	partialDerivativeX := mat.NewVecDense(numSatellites, nil)
 	partialDerivativeX.SubVec(recieverX, newPosXVector)
 	partialDerivativeX.DivElemVec(partialDerivativeX, computedPseudoRange)
-	matPrint(partialDerivativeX)
 
 	partialDerivativeY := mat.NewVecDense(numSatellites, nil)
 	partialDerivativeY.SubVec(recieverY, newPosYVector)
@@ -133,11 +133,10 @@ func solve(x float64, y float64, z float64, t float64, pseudorangevector *mat.Ve
 	partialDerivativeMatrix.SetCol(0, partialDerivativeX.RawVector().Data)
 	partialDerivativeMatrix.SetCol(1, partialDerivativeY.RawVector().Data)
 	partialDerivativeMatrix.SetCol(2, partialDerivativeZ.RawVector().Data)
+	partialDerivativeMatrix.SetCol(3, partialDerivativeT.RawVector().Data)
 
 	solutions := mat.NewDense(4, 1, nil)
 	solutions.Solve(partialDerivativeMatrix, ObservedMinusComputedPseudoRanges)
-
-	// matPrint(solutions)
 
 	xcorrection = solutions.At(0, 0)
 	ycorrection = solutions.At(1, 0)
