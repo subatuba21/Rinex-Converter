@@ -11,7 +11,7 @@ var c float64 = 299792458
 
 func Algorithm(data UnprocessedData) ProcessedData {
 	const iterations = 4
-	x, y, z, t := 4331297.3480, 567555.6390, 4633133.7280, 0.
+	x, y, z, t := 4000000., 4000000., 4000000., 0.
 	satellitePseudoranges := []float64{}
 	availableSatData := []float64{}
 
@@ -26,7 +26,7 @@ func Algorithm(data UnprocessedData) ProcessedData {
 	}
 
 	pseudorangevector := mat.NewVecDense(len(data.RINEXInfo.RinexEntries), satellitePseudoranges)
-	satellitematrix := mat.NewDense(len(availableSatData), 4, availableSatData)
+	satellitematrix := mat.NewDense(len(satellitePseudoranges), 4, availableSatData)
 
 	for i := 0; i < iterations; i++ {
 		xcorrection, ycorrection, zcorrection, tcorrection := solve(x, y, z, t, pseudorangevector, satellitematrix)
@@ -135,10 +135,12 @@ func solve(x float64, y float64, z float64, t float64, pseudorangevector *mat.Ve
 	solutions := mat.NewDense(4, 1, nil)
 	solutions.Solve(partialDerivativeMatrix, ObservedMinusComputedPseudoRanges)
 
-	xcorrection = solutions.At(0, 1)
-	ycorrection = solutions.At(0, 2)
-	zcorrection = solutions.At(0, 3)
-	tcorrection = solutions.At(0, 4)
+	matPrint(solutions)
+
+	xcorrection = solutions.At(0, 0)
+	ycorrection = solutions.At(1, 0)
+	zcorrection = solutions.At(2, 0)
+	tcorrection = solutions.At(3, 0)
 	return
 }
 
