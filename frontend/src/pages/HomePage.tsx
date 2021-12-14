@@ -189,12 +189,36 @@ export function HomePage(props: HomePageProps) {
             </div>
           </div>
           <div className="example-file">
-            <p>India GPS Station - Latitude 67, longitude 69</p>
+            <p
+              onClick={onRequestExample(
+                "jpl"
+              )}
+            >
+              NASA Jet Propulsion Laboratory - Pasadena, California
+            </p>
             <div className="download-icon">
               <a
-                href="/rinex.txt"
+                href="/jpl.txt"
                 target="_blank"
-                download="Antartica_Rinex.txt"
+                download="jpl.txt"
+              >
+                <DownloadIcon></DownloadIcon>
+              </a>
+            </div>
+          </div>
+          <div className="example-file">
+            <p
+              onClick={onRequestExample(
+                "usno"
+              )}
+            >
+              US Naval Observatory, Washington D.C.
+            </p>
+            <div className="download-icon">
+              <a
+                href="/usno.txt"
+                target="_blank"
+                download="usno.txt"
               >
                 <DownloadIcon></DownloadIcon>
               </a>

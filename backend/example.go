@@ -17,8 +17,10 @@ func (s *Server) HandleExample() http.HandlerFunc {
 			filename = "frontend/public/antarctica.txt"
 		} else if exampleName == "SwitzerlandUniversitätssternwarteZimmerwald" {
 			filename = "frontend/public/switzerland.txt"
-		} else if exampleName == "Other" {
-
+		} else if exampleName == "jpl" {
+			filename = "frontend/public/jpl.txt"
+		} else if exampleName == "usno" {
+			filename = "frontend/public/usno.txt"
 		} else {
 			fmt.Fprint(w, "No available example file specified.")
 			return
