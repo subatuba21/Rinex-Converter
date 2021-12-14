@@ -146,7 +146,7 @@ export function HomePage(props: HomePageProps) {
         </div>
         <div id="upload-section">
           Please upload a{" "}
-          <em className="accent-color-text">RINEX 3.0 MIXED file</em> (example
+          <em className="accent-color-text">RINEX 3.0 GPS file</em> (example
           on the left). The application will process the data and show the
           corresponding location.
           <Button variant="contained" component="label" id="upload-button">
