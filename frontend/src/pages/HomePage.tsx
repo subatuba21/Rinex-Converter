@@ -2,7 +2,7 @@ import { Button } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
 import { Dot } from "react-animated-dots";
 import "./HomePage.css";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent } from "react";
 import MapComponent from "../mapsapi";
 
 const upload_page = "u";
@@ -14,6 +14,23 @@ type HomePageProps = {
     page: string,
     setPage: React.Dispatch<React.SetStateAction<string>>
   ];
+  resultsState: [
+    results: Response | null,
+    setResults: React.Dispatch<React.SetStateAction<Response | null>>
+  ];
+};
+
+type SatelliteEntry = {
+  GPSID: number;
+  PositionX: number;
+  PositionY: number;
+  PositionZ: number;
+  ClockBias: number;
+};
+
+type RINEXEntry = {
+  GPSID: number;
+  Pseudorange: number;
 };
 
 type EpochData = {
@@ -24,14 +41,30 @@ type EpochData = {
     Latitude: number;
     Longitude: number;
   };
+  SatelliteInfo: {
+    SatelliteEntries: Array<SatelliteEntry>;
+  };
+  RINEXInfo: {
+    Year: number;
+    Month: number;
+    Day: number;
+    Hour: number;
+    Minutes: number;
+    Seconds: number;
+    RinexEntries: Array<RINEXEntry>;
+  };
 };
-type Response = Array<EpochData>;
 
-console.log(process.env.REACT_APP_MAPS_API_CODE)
+type Response = Array<EpochData>;
 
 export function HomePage(props: HomePageProps) {
   const [page, setPage] = props.homeState;
-  const [results, setResults] = useState<Response | null>(null);
+  const [results, setResults] = props.resultsState;
+
+  function returnToUpload() {
+    setPage(upload_page);
+    setResults(null);
+  }
 
   function onUpload(event: ChangeEvent<HTMLInputElement>) {
     const formData = new FormData();
@@ -50,6 +83,53 @@ export function HomePage(props: HomePageProps) {
           setPage(results_page);
         });
     }
+  }
+
+  function onRequestExample(exampleName: string) {
+    return function (event: any) {
+      setPage(processing_page);
+
+      fetch("/api/example", {
+        method: "POST",
+        body: exampleName,
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          setResults(res);
+          setPage(results_page);
+        });
+    };
+  }
+
+  function SatelliteInfo() {
+    const entries: Array<JSX.Element> = [];
+    if (results && results.length > 0) {
+      const epoch = results[0];
+      console.log(epoch);
+      for (var entry of epoch.RINEXInfo.RinexEntries) {
+        // eslint-disable-next-line no-loop-func
+        const satentry = epoch.SatelliteInfo.SatelliteEntries.find(
+          (val) => val.GPSID === entry.GPSID
+        );
+        entries.push(
+          <div className="satelliteInfo">
+            <h3>Satellite ID: {entry.GPSID}</h3>
+            <p>
+              <span>Pseudorange: {entry.Pseudorange}</span>
+              <br />
+              <span>ECEF X-Coordinate: {satentry?.PositionX}</span>
+              <br />
+              <span>ECEF Y-Coordinate: {satentry?.PositionY}</span>
+              <br />
+              <span>ECEF Z-Coordinate: {satentry?.PositionZ}</span>
+              <br />
+            </p>
+          </div>
+        );
+      }
+    }
+
+    return <div id="satInfoContainer">{entries}</div>;
   }
 
   if (page === upload_page) {
@@ -77,24 +157,32 @@ export function HomePage(props: HomePageProps) {
           If you don't have a RINEX file ready, you can try the example RINEX
           files below.
           <div className="example-file">
-            <p>Antarctica</p>
+            <p onClick={onRequestExample("AntarticaMcMurdoStation")}>
+              Antarctica - McMurdo Station
+            </p>
             <div className="download-icon">
               <a
-                href="/rinex.txt"
+                href="/antarctica.txt"
                 target="_blank"
-                download="Antartica_Rinex.txt"
+                download="antarctica.txt"
               >
                 <DownloadIcon></DownloadIcon>
               </a>
             </div>
           </div>
           <div className="example-file">
-            <p>Europe</p>
+            <p
+              onClick={onRequestExample(
+                "SwitzerlandUniversitätssternwarteZimmerwald"
+              )}
+            >
+              Switzerland - Universitätssternwarte Zimmerwald
+            </p>
             <div className="download-icon">
               <a
-                href="/rinex.txt"
+                href="/switzerland.txt"
                 target="_blank"
-                download="Antartica_Rinex.txt"
+                download="switzerland.txt"
               >
                 <DownloadIcon></DownloadIcon>
               </a>
@@ -131,11 +219,10 @@ export function HomePage(props: HomePageProps) {
       <div id="results">
         <div id="left">
           <div id="map">
-            <MapComponent latitude={results ? results[0].UserLocation.Latitude : 0}
-            longitude={results ? results[0].UserLocation.Longitude : 0}></MapComponent>
-          </div>
-          <div id="stats">
-            <h2>Satellites Available</h2>
+            <MapComponent
+              latitude={results ? results[0].UserLocation.Latitude : 0}
+              longitude={results ? results[0].UserLocation.Longitude : 0}
+            ></MapComponent>
           </div>
         </div>
         <div id="right">
@@ -159,7 +246,24 @@ export function HomePage(props: HomePageProps) {
               Want to know how the application calculated these values? Click
               the info button on the bottom right to learn more.
             </span>
+            <br />
+            <br />
+            <span
+              onClick={returnToUpload}
+              style={{
+                fontSize: "1.3rem",
+                color: "var(--accent-color)",
+                textDecoration: "underline",
+                cursor: "pointer",
+              }}
+            >
+              Go back to upload page.
+            </span>
           </p>
+        </div>
+        <div id="stats">
+          <h2>Satellites Used In Calculation</h2>
+          <SatelliteInfo></SatelliteInfo>
         </div>
       </div>
     );

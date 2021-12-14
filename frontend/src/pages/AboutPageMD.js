@@ -1,5 +1,16 @@
 const md = 
-`# Heading 1
+`# About this App
+
+This app was made for 
+
+
+## How it works
+
+
+## The Algorithm
+
+
+##
 
 hfhhfhfhfh
 

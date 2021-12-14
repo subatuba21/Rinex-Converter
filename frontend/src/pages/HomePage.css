@@ -81,15 +81,17 @@
 }
 
 #results #left {
-    float: left;
+    display: inline-block;
     width: 50%;
+    padding-left: 1rem;
     
 }
 
 #results #right {
-    float: left;
+    display: inline-block;
     width: 40%;
     text-align: left;
+    padding-left: 1rem;
 }
 
 #results #right p {
@@ -105,4 +107,19 @@
 #stats h2 {
     color: var(--accent-color);
     font-size: 1.7rem;
+}
+
+#stats {
+    padding: 2rem;
+    text-align: left;
+    color: white;
+}
+
+#satInfoContainer {
+    display: flex;
+    flex-wrap: wrap
+}
+
+#stats .satelliteInfo {
+    padding: 1.2rem;
 }

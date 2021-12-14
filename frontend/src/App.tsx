@@ -9,6 +9,7 @@ import AboutPage from "./pages/AboutPage";
 function App() {
 
   const pageState = useState(PageStatus.upload_page);
+  const resultsState = useState<any>(null)
   
   return (
     <div className="App">
@@ -16,7 +17,7 @@ function App() {
       <div id="computer-only">
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<HomePage homeState={pageState}></HomePage>}></Route>
+            <Route path="/" element={<HomePage homeState={pageState} resultsState={resultsState}></HomePage>}></Route>
           </Routes>
           <Routes>
             <Route path="/about" element={<AboutPage></AboutPage>}></Route>
