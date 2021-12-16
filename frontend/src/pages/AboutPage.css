@@ -13,3 +13,20 @@
     font-size: 1.3rem;
 }
 
+#markdown-doc a {
+    color: var(--accent-color);
+    font-style: italic;
+}
+
+#markdown-doc img {
+    max-width: 100%;
+}
+
+#markdown-doc em {
+    color: var(--accent-color);
+}
+
+#markdown-doc li {
+    font-size: 1.3rem;
+}
+
