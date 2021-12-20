@@ -4,6 +4,20 @@ import { Dot } from "react-animated-dots";
 import "./HomePage.css";
 import { ChangeEvent } from "react";
 import MapComponent from "../mapsapi";
+import { styled, Tooltip, tooltipClasses, TooltipProps } from "@mui/material";
+
+const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: "#f5f5f9",
+    color: "rgba(0, 0, 0, 0.87)",
+    maxWidth: 220,
+    fontSize: theme.typography.pxToRem(21),
+    border: "1px solid #dadde9",
+  },
+}));
+
 
 const upload_page = "u";
 const processing_page = "p";
@@ -161,13 +175,14 @@ export function HomePage(props: HomePageProps) {
               Antarctica - McMurdo Station
             </p>
             <div className="download-icon">
+            <HtmlTooltip title="View RINEX file" placement="top">
               <a
                 href="/antarctica.txt"
                 target="_blank"
-                download="antarctica.txt"
               >
                 <DownloadIcon></DownloadIcon>
               </a>
+              </HtmlTooltip>
             </div>
           </div>
           <div className="example-file">
@@ -179,13 +194,14 @@ export function HomePage(props: HomePageProps) {
               Switzerland - Universitätssternwarte Zimmerwald
             </p>
             <div className="download-icon">
+            <HtmlTooltip title="View RINEX file" placement="top">
               <a
                 href="/switzerland.txt"
                 target="_blank"
-                download="switzerland.txt"
               >
                 <DownloadIcon></DownloadIcon>
               </a>
+              </HtmlTooltip>
             </div>
           </div>
           <div className="example-file">
@@ -197,13 +213,14 @@ export function HomePage(props: HomePageProps) {
               NASA Jet Propulsion Laboratory - Pasadena, California
             </p>
             <div className="download-icon">
+             <HtmlTooltip title="View RINEX file" placement="top">
               <a
                 href="/jpl.txt"
                 target="_blank"
-                download="jpl.txt"
               >
                 <DownloadIcon></DownloadIcon>
               </a>
+              </HtmlTooltip>
             </div>
           </div>
           <div className="example-file">
@@ -215,13 +232,14 @@ export function HomePage(props: HomePageProps) {
               US Naval Observatory, Washington D.C.
             </p>
             <div className="download-icon">
+            <HtmlTooltip title="View RINEX file" placement="top">
               <a
                 href="/usno.txt"
                 target="_blank"
-                download="usno.txt"
               >
                 <DownloadIcon></DownloadIcon>
               </a>
+              </HtmlTooltip>
             </div>
           </div>
         </div>
