@@ -24,7 +24,7 @@ function MapComponent({
 
   return (
     <LoadScript googleMapsApiKey={process.env.REACT_APP_MAPS_API_CODE as string}>
-      <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={5}>
+      <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={8}>
         <Marker position={center}></Marker>
       </GoogleMap>
     </LoadScript>

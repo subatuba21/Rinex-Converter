@@ -232,7 +232,7 @@ if err != nil {
     return nil, err
 }
 
-// The files used were names using dates, except the dates were not traditional. 
+// The files used were named using dates, except the dates were not traditional. 
 // GPS week 2187 was the week of December 6th, 2021. I used an algorithm to extract
 // the GPS date from the date provided in the RINEX file.
 gpsdirectories := map[GPSWeekAndDay]bool{}
